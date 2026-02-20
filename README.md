@@ -11,7 +11,9 @@ make build
 ## Install
 
 ```bash
-make install   # copies to /opt/homebrew/bin/calbuddy
+make install   # copies to ~/.local/bin/calbuddy
+# optional: override install prefix
+make install PREFIX=/usr/local
 ```
 
 ## Usage

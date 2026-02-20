@@ -1,4 +1,4 @@
-PREFIX ?= /usr/local
+PREFIX ?= $(HOME)/.local
 COMPLETIONS_DIR ?= completions
 BASH_COMPLETION_DIR ?= $(HOME)/.local/share/bash-completion/completions
 ZSH_COMPLETION_DIR ?= $(HOME)/.zsh/completions
@@ -10,6 +10,7 @@ build:
 	swift build -c release
 
 install: build
+	mkdir -p $(PREFIX)/bin
 	cp .build/release/CalBuddy $(PREFIX)/bin/calbuddy
 
 test:
