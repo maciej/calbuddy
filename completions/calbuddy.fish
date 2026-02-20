@@ -1,0 +1,37 @@
+complete -c calbuddy -f
+
+set -l calbuddy_commands eventsToday eventsToday+N eventsNow eventsFrom:START calendars uncompletedTasks addEvent editEvent completion
+
+complete -c calbuddy -n "not __fish_seen_subcommand_from $calbuddy_commands" -a "eventsToday eventsToday+N eventsNow eventsFrom:START calendars uncompletedTasks addEvent editEvent completion"
+complete -c calbuddy -n "__fish_seen_subcommand_from completion completions" -a "bash zsh fish"
+
+complete -c calbuddy -o df -l dateFormat -r -d "Date format"
+complete -c calbuddy -o tf -l timeFormat -r -d "Time format"
+complete -c calbuddy -o ic -l includeCals -r -d "Include calendars (comma-separated)"
+complete -c calbuddy -o ec -l excludeCals -r -d "Exclude calendars (comma-separated)"
+complete -c calbuddy -o sc -l separateByCalendar -d "Group output by calendar"
+complete -c calbuddy -o sd -l separateByDate -d "Group output by date"
+complete -c calbuddy -o b -l bullet -r -d "Bullet prefix"
+complete -c calbuddy -o nc -l noCalendarNames -d "Hide calendar names"
+complete -c calbuddy -o ea -l excludeAllDayEvents -d "Skip all-day events"
+complete -c calbuddy -o n -l includeOnlyEventsFromNowOn -d "Only future events"
+complete -c calbuddy -o eep -l excludeEventProps -r -d "Exclude properties"
+complete -c calbuddy -o iep -l includeEventProps -r -d "Include only properties"
+complete -c calbuddy -o li -l limitItems -r -d "Max items"
+complete -c calbuddy -o uid -l showUIDs -d "Show event UIDs"
+complete -c calbuddy -o eed -l excludeEndDates -d "Hide end dates"
+complete -c calbuddy -o sed -l showEmptyDates -d "Show empty date groups"
+complete -c calbuddy -o f -l formatOutput -d "ANSI color formatting"
+complete -c calbuddy -o V -l version -d "Print version"
+
+complete -c calbuddy -n "__fish_seen_subcommand_from addEvent editEvent" -l title -r -d "Event title"
+complete -c calbuddy -n "__fish_seen_subcommand_from addEvent editEvent" -l calendar -r -d "Calendar name"
+complete -c calbuddy -n "__fish_seen_subcommand_from addEvent editEvent" -l start -r -d "Start datetime"
+complete -c calbuddy -n "__fish_seen_subcommand_from addEvent editEvent" -l end -r -d "End datetime"
+complete -c calbuddy -n "__fish_seen_subcommand_from addEvent editEvent" -l duration -r -d "Duration (minutes)"
+complete -c calbuddy -n "__fish_seen_subcommand_from addEvent editEvent" -l allday -d "All-day event"
+complete -c calbuddy -n "__fish_seen_subcommand_from addEvent editEvent" -l alarm -r -d "Alarm minutes before"
+complete -c calbuddy -n "__fish_seen_subcommand_from addEvent editEvent" -l location -r -d "Location"
+complete -c calbuddy -n "__fish_seen_subcommand_from addEvent editEvent" -l notes -r -d "Notes"
+complete -c calbuddy -n "__fish_seen_subcommand_from addEvent editEvent" -l url -r -d "URL"
+complete -c calbuddy -n "__fish_seen_subcommand_from editEvent" -l uid -r -d "Event UID"

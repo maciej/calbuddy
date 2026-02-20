@@ -12,6 +12,14 @@ case .version:
     print("calbuddy \(version)")
     exit(0)
 
+case .completion(let shell):
+    guard let script = generateCompletionScript(for: shell) else {
+        fputs("Error: completion requires one of: bash, zsh, fish\n", stderr)
+        exit(1)
+    }
+    print(script)
+    exit(0)
+
 case .help:
     printHelp()
     exit(0)

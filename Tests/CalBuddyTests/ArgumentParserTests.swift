@@ -38,6 +38,16 @@ final class ArgumentParserTests: XCTestCase {
         XCTAssertEqual(opts.command, .version)
     }
 
+    func testCompletionCommand() {
+        let opts = parseArguments(["completion", "zsh"])
+        XCTAssertEqual(opts.command, .completion("zsh"))
+    }
+
+    func testCompletionCommandWithoutShell() {
+        let opts = parseArguments(["completion"])
+        XCTAssertEqual(opts.command, .completion(""))
+    }
+
     func testEventsFromToCommand() {
         let opts = parseArguments(["eventsFrom:2026-02-01", "to:2026-02-10"])
         XCTAssertEqual(opts.command, .eventsFromTo("2026-02-01", "2026-02-10"))

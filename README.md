@@ -34,7 +34,38 @@ calbuddy calendars
 
 # Uncompleted reminders
 calbuddy uncompletedTasks
+
+# Generate completion script for your shell
+calbuddy completion zsh
 ```
+
+## Shell Completions
+
+Generate completion scripts:
+
+```bash
+calbuddy completion bash
+calbuddy completion zsh
+calbuddy completion fish
+```
+
+Generate all scripts into `./completions`:
+
+```bash
+make completions
+```
+
+Install completions locally:
+
+```bash
+make install-completions-local
+```
+
+Installed paths:
+
+- Bash: `~/.local/share/bash-completion/completions/calbuddy`
+- Zsh: `~/.zsh/completions/_calbuddy`
+- Fish: `~/.config/fish/completions/calbuddy.fish`
 
 ## Options
 

@@ -10,6 +10,7 @@ enum Command: Equatable, Sendable {
     case uncompletedTasks
     case addEvent
     case editEvent
+    case completion(String)
     case version
     case help
 }
@@ -341,6 +342,14 @@ func parseCommand(_ cmd: String, args: [String], startIndex: Int) -> Command {
         return .addEvent
     } else if cmd == "editEvent" {
         return .editEvent
+    } else if cmd == "completion" || cmd == "completions" {
+        if startIndex + 1 < args.count {
+            let shell = args[startIndex + 1].lowercased()
+            if shell == "bash" || shell == "zsh" || shell == "fish" {
+                return .completion(shell)
+            }
+        }
+        return .completion("")
     } else {
         return .help
     }
@@ -363,6 +372,7 @@ func printHelp() {
         uncompletedTasks     Print uncompleted reminders
         addEvent             Create a new calendar event
         editEvent            Edit an existing event by UID
+        completion SHELL     Print shell completion script (bash|zsh|fish)
 
     OPTIONS:
         -df, --dateFormat FORMAT       Date format (default: %Y-%m-%d %A)
