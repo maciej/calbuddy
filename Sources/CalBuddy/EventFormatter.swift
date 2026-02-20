@@ -83,6 +83,23 @@ struct ANSIColor {
     static let white = "\u{001B}[37m"
 }
 
+/// Build datetime text for an event line.
+func formatEventDateTime(startDate: Date, endDate: Date, isAllDay: Bool, options: ParsedOptions) -> String {
+    let dateText = formatDate(startDate, format: options.dateFormat)
+
+    if isAllDay {
+        return "\(dateText) (all day)"
+    }
+
+    let startTime = formatDate(startDate, format: options.timeFormat)
+    if options.excludeEndDates {
+        return "\(dateText) \(startTime)"
+    }
+
+    let endTime = formatDate(endDate, format: options.timeFormat)
+    return "\(dateText) \(startTime)-\(endTime)"
+}
+
 /// Format a single event line
 func formatEvent(_ event: EKEvent, options: ParsedOptions) -> String {
     var parts: [String] = []
@@ -98,16 +115,21 @@ func formatEvent(_ event: EKEvent, options: ParsedOptions) -> String {
 
     // Date/time
     if shouldShowProperty("datetime", options: options) {
-        if event.isAllDay {
-            parts.append("(all day)")
-        } else {
-            let startTime = formatDate(event.startDate, format: options.timeFormat)
-            if options.excludeEndDates {
-                parts.append(startTime)
+        // Include date in per-event lines by default; -sd already provides date in section headers.
+        if options.separateByDate {
+            if event.isAllDay {
+                parts.append("(all day)")
             } else {
-                let endTime = formatDate(event.endDate, format: options.timeFormat)
-                parts.append("\(startTime)-\(endTime)")
+                let startTime = formatDate(event.startDate, format: options.timeFormat)
+                if options.excludeEndDates {
+                    parts.append(startTime)
+                } else {
+                    let endTime = formatDate(event.endDate, format: options.timeFormat)
+                    parts.append("\(startTime)-\(endTime)")
+                }
             }
+        } else {
+            parts.append(formatEventDateTime(startDate: event.startDate, endDate: event.endDate, isAllDay: event.isAllDay, options: options))
         }
     }
 

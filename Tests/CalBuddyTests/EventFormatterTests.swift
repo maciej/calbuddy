@@ -83,6 +83,61 @@ final class EventFormatterTests: XCTestCase {
         XCTAssertEqual(result, "2026-02-04")
     }
 
+    // MARK: - event datetime text tests
+
+    func testFormatEventDateTimeIncludesDateAndRangeByDefault() {
+        var opts = ParsedOptions()
+        opts.dateFormat = "%Y-%m-%d"
+        opts.timeFormat = "%H:%M"
+
+        var start = DateComponents()
+        start.year = 2026
+        start.month = 2
+        start.day = 18
+        start.hour = 11
+        start.minute = 0
+
+        var end = DateComponents()
+        end.year = 2026
+        end.month = 2
+        end.day = 18
+        end.hour = 11
+        end.minute = 25
+
+        let text = formatEventDateTime(
+            startDate: Calendar.current.date(from: start)!,
+            endDate: Calendar.current.date(from: end)!,
+            isAllDay: false,
+            options: opts
+        )
+
+        XCTAssertEqual(text, "2026-02-18 11:00-11:25")
+    }
+
+    func testFormatEventDateTimeRespectsCustomDateFormat() {
+        var opts = ParsedOptions()
+        opts.dateFormat = "%b %e"
+        opts.timeFormat = "%H:%M"
+        opts.excludeEndDates = true
+
+        var start = DateComponents()
+        start.year = 2026
+        start.month = 2
+        start.day = 18
+        start.hour = 11
+        start.minute = 0
+
+        let date = Calendar.current.date(from: start)!
+        let text = formatEventDateTime(
+            startDate: date,
+            endDate: date,
+            isAllDay: false,
+            options: opts
+        )
+
+        XCTAssertEqual(text, "Feb 18 11:00")
+    }
+
     // MARK: - shouldShowProperty tests
 
     func testShouldShowPropertyDefault() {
