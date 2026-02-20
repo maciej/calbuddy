@@ -2,8 +2,6 @@
 
 A modern replacement for icalBuddy, built with Swift and EventKit.
 
-`uncompletedTasks` has been removed from CalBuddy. For Apple Reminders CLI workflows, use `remindctl`: https://github.com/steipete/remindctl
-
 ## Build
 
 ```bash
@@ -104,3 +102,7 @@ Installed paths:
 | `-V`  | `--version` | Version |
 
 Properties: `title`, `datetime`, `location`, `notes`, `url`, `attendees`
+
+## Compatibility Notes
+
+`uncompletedTasks` has been removed from CalBuddy. For Apple Reminders CLI workflows, use `remindctl`: https://github.com/steipete/remindctl
