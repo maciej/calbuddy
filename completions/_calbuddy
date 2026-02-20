@@ -1,87 +1,109 @@
 #compdef calbuddy
 
-_calbuddy() {
-    local -a commands global_opts add_edit_opts value_flags shells
-    commands=(
-        "eventsToday"
-        "eventsToday+N"
-        "eventsNow"
-        "eventsFrom:START"
-        "calendars"
-        "uncompletedTasks"
-        "addEvent"
-        "editEvent"
-        "completion"
-    )
-    global_opts=(
-        "-df" "--dateFormat"
-        "-tf" "--timeFormat"
-        "-ic" "--includeCals"
-        "-ec" "--excludeCals"
-        "-sc" "--separateByCalendar"
-        "-sd" "--separateByDate"
-        "-b" "--bullet"
-        "-nc" "--noCalendarNames"
-        "-ea" "--excludeAllDayEvents"
-        "-n" "--includeOnlyEventsFromNowOn"
-        "-eep" "--excludeEventProps"
-        "-iep" "--includeEventProps"
-        "-li" "--limitItems"
-        "-uid" "--showUIDs"
-        "-eed" "--excludeEndDates"
-        "-sed" "--showEmptyDates"
-        "-f" "--formatOutput"
-        "-V" "--version"
-    )
-    add_edit_opts=(
-        "--title" "--calendar" "--start" "--end" "--duration"
-        "--allday" "--alarm" "--location" "--notes" "--url" "--uid"
-    )
-    value_flags=(
-        "-df" "--dateFormat" "-tf" "--timeFormat" "-ic" "--includeCals" "-ec" "--excludeCals"
-        "-b" "--bullet" "-eep" "--excludeEventProps" "-iep" "--includeEventProps" "-li" "--limitItems"
-        "--title" "--calendar" "--start" "--end" "--duration" "--alarm" "--location" "--notes" "--url" "--uid"
-    )
-    shells=("bash" "zsh" "fish")
-
-    if (( CURRENT > 2 )) && [[ "${words[CURRENT-1]}" == "completion" || "${words[CURRENT-1]}" == "completions" ]]; then
-        compadd -- $shells
-        return
-    fi
-
-    local flag
-    for flag in $value_flags; do
-        if [[ "${words[CURRENT-1]}" == "$flag" ]]; then
-            return
-        fi
-    done
-
-    local cmd=""
-    local i=2
-    while (( i < CURRENT )); do
-        if [[ "${words[i]}" != -* ]]; then
-            cmd="${words[i]}"
-            break
-        fi
-        (( i++ ))
-    done
-
-    if [[ -z "$cmd" ]]; then
-        compadd -- $commands $global_opts
-        return
-    fi
-
-    case "$cmd" in
-        addEvent|editEvent)
-            compadd -- $global_opts $add_edit_opts
-            ;;
-        completion|completions)
-            compadd -- $shells
-            ;;
-        *)
-            compadd -- $global_opts
-            ;;
-    esac
+__calbuddy_complete() {
+    local -ar non_empty_completions=("${@:#(|:*)}")
+    local -ar empty_completions=("${(M)@:#(|:*)}")
+    _describe -V '' non_empty_completions -- empty_completions -P $'\'\''
 }
 
-_calbuddy "$@"
+__calbuddy_custom_complete() {
+    local -a completions
+    completions=("${(@f)"$("${command_name}" "${@}" "${command_line[@]}")"}")
+    if [[ "${#completions[@]}" -gt 1 ]]; then
+        __calbuddy_complete "${completions[@]:0:-1}"
+    fi
+}
+
+__calbuddy_cursor_index_in_current_word() {
+    if [[ -z "${QIPREFIX}${IPREFIX}${PREFIX}" ]]; then
+        printf 0
+    else
+        printf %s "${#${(z)LBUFFER}[-1]}"
+    fi
+}
+
+_calbuddy() {
+    emulate -RL zsh -G
+    setopt extendedglob nullglob numericglobsort
+    unsetopt aliases banghist
+
+    local -xr SAP_SHELL=zsh
+    local -x SAP_SHELL_VERSION
+    SAP_SHELL_VERSION="$(builtin emulate zsh -c 'printf %s "${ZSH_VERSION}"')"
+    local -r SAP_SHELL_VERSION
+
+    local context state state_descr line
+    local -A opt_args
+
+    local -r command_name="${words[1]}"
+    local -ar command_line=("${words[@]}")
+    local -ir current_word_index="$((CURRENT - 1))"
+
+    local -i ret=1
+    local -ar _positionals=('eventsToday' 'eventsToday+1' 'eventsNow' 'eventsFrom:today' 'calendars' 'uncompletedTasks' 'addEvent' 'editEvent' 'completion' 'completions')
+    local -ar arg_specs=(
+        '(-df --dateFormat)'{-df,--dateFormat}'[Date format]:FORMAT:'
+        '(-tf --timeFormat)'{-tf,--timeFormat}'[Time format]:FORMAT:'
+        '(-ic --includeCals)'{-ic,--includeCals}'[Include only these calendars (comma-separated)]:CALS:'
+        '(-ec --excludeCals)'{-ec,--excludeCals}'[Exclude these calendars (comma-separated)]:CALS:'
+        '(-sc --separateByCalendar)'{-sc,--separateByCalendar}'[Group output by calendar]'
+        '(-sd --separateByDate)'{-sd,--separateByDate}'[Group output by date]'
+        '(-b --bullet)'{-b,--bullet}'[Bullet prefix]:VALUE:'
+        '(-nc --noCalendarNames)'{-nc,--noCalendarNames}'[Hide calendar names]'
+        '(-ea --excludeAllDayEvents)'{-ea,--excludeAllDayEvents}'[Skip all-day events]'
+        '(-n --includeOnlyEventsFromNowOn)'{-n,--includeOnlyEventsFromNowOn}'[Only include future events]'
+        '(-eep --excludeEventProps)'{-eep,--excludeEventProps}'[Exclude properties]:PROPS:'
+        '(-iep --includeEventProps)'{-iep,--includeEventProps}'[Include only these properties]:PROPS:'
+        '(-li --limitItems)'{-li,--limitItems}'[Max items]:NUM:'
+        '(-uid --showUIDs)'{-uid,--showUIDs}'[Show event UIDs]'
+        '(-eed --excludeEndDates)'{-eed,--excludeEndDates}'[Hide end dates]'
+        '(-sed --showEmptyDates)'{-sed,--showEmptyDates}'[Show empty date sections]'
+        '(-f --formatOutput)'{-f,--formatOutput}'[ANSI color formatting]'
+        '(-V --version)'{-V,--version}'[Print version]'
+        '--title[Event title]:TITLE:'
+        '--calendar[Calendar name]:NAME:'
+        '--start[Start date/time]:DATETIME:'
+        '--end[End date/time]:DATETIME:'
+        '--duration[Duration in minutes]:MINUTES:'
+        '--allday[Create/set all-day event]'
+        '*--alarm[Alarm minutes before]:MINUTES:'
+        '--location[Event location]:PLACE:'
+        '--notes[Event notes]:TEXT:'
+        '--url[Event URL]:URL:'
+        '--uid[Event UID for editEvent]:UID:'
+        '*:positionals:{__calbuddy_complete "${_positionals[@]}"}'
+        '(-h --help)'{-h,--help}'[Show help information.]'
+        '(-): :->command'
+        '(-)*:: :->arg'
+    )
+    _arguments -w -s -S : "${arg_specs[@]}" && ret=0
+    case "${state}" in
+    command)
+        local -ar subcommands=(
+            'help:Show subcommand help information.'
+        )
+        _describe -V subcommand subcommands
+        ;;
+    arg)
+        case "${words[1]}" in
+        help)
+            "_calbuddy_${words[1]}"
+            ;;
+        esac
+        ;;
+    esac
+
+    return "${ret}"
+}
+
+_calbuddy_help() {
+    local -i ret=1
+    local -ar arg_specs=(
+        '*:subcommands:'
+    )
+    _arguments -w -s -S : "${arg_specs[@]}" && ret=0
+
+    return "${ret}"
+}
+
+_calbuddy

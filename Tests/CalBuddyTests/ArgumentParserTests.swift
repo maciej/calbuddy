@@ -261,4 +261,18 @@ final class ArgumentParserTests: XCTestCase {
         XCTAssertNil(opts.addEventOptions.notes)
         XCTAssertNil(opts.addEventOptions.url)
     }
+
+    func testHelpMessageContainsLegacyCommandSyntax() {
+        let help = helpMessage()
+        XCTAssertTrue(help.contains("eventsFrom:START to:END"))
+        XCTAssertTrue(help.contains("--dateFormat"))
+    }
+
+    func testCompletionScriptGenerationUsesParserSchema() {
+        let zshScript = generateCompletionScript(for: "zsh")
+        XCTAssertNotNil(zshScript)
+        XCTAssertTrue(zshScript?.contains("calbuddy") == true)
+        XCTAssertTrue(zshScript?.contains("--dateFormat") == true)
+        XCTAssertTrue(zshScript?.contains("eventsToday") == true)
+    }
 }
