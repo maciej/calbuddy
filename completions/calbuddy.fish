@@ -27,7 +27,7 @@ function __calbuddy_parse_tokens -S
 
     switch $unparsed_tokens[1]
     case 'calbuddy'
-        __calbuddy_parse_subcommand -r 1 'dateFormat=' 'timeFormat=' 'includeCals=' 'excludeCals=' 'separateByCalendar' 'separateByDate' 'b/bullet=' 'noCalendarNames' 'excludeAllDayEvents' 'n/includeOnlyEventsFromNowOn' 'excludeEventProps=' 'includeEventProps=' 'limitItems=' 'showUIDs' 'excludeEndDates' 'showEmptyDates' 'f/formatOutput' 'V/version' 'title=' 'calendar=' 'start=' 'end=' 'duration=' 'allday' 'alarm=+' 'location=' 'notes=' 'url=' 'uid=' 'h/help'
+        __calbuddy_parse_subcommand -r 1 'dateFormat=' 'timeFormat=' 'includeCals=' 'excludeCals=' 'separateByCalendar' 'separateByDate' 'b/bullet=' 'noCalendarNames' 'excludeAllDayEvents' 'n/includeOnlyEventsFromNowOn' 'excludeEventProps=' 'includeEventProps=' 'limitItems=' 'showUIDs' 'excludeEndDates' 'showEmptyDates' 'f/formatOutput' 'json' 'v/verbose' 'V/version' 'title=' 'calendar=' 'start=' 'end=' 'duration=' 'allday' 'alarm=+' 'location=' 'notes=' 'url=' 'uid=' 'h/help'
         switch $unparsed_tokens[1]
         case 'help'
             __calbuddy_parse_subcommand -r 1 
@@ -108,6 +108,8 @@ complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_opti
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" eed excludeEndDates' -o 'eed' -l 'excludeEndDates' -d 'Hide end dates'
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" sed showEmptyDates' -o 'sed' -l 'showEmptyDates' -d 'Show empty date sections'
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" f formatOutput' -s 'f' -l 'formatOutput' -d 'ANSI color formatting'
+complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" json' -l 'json' -d 'Output compact JSON (supported by eventsToday, eventsNow, eventsFrom:... and calendars)'
+complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" v verbose' -s 'v' -l 'verbose' -d 'Verbose output. With --json, include extended fields'
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" V version' -s 'V' -l 'version' -d 'Print version'
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" title' -l 'title' -d 'Event title' -rfka ''
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" calendar' -l 'calendar' -d 'Calendar name' -rfka ''

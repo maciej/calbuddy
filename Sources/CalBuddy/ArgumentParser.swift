@@ -45,6 +45,11 @@ struct EditEventOptions: Sendable, Equatable {
 }
 
 /// All parsed options from command line
+enum JSONMode: String, Sendable, Equatable {
+    case compact
+    case verbose
+}
+
 struct ParsedOptions: Sendable {
     var command: Command = .help
     var dateFormat: String = "%Y-%m-%d %A"
@@ -64,6 +69,7 @@ struct ParsedOptions: Sendable {
     var excludeEndDates: Bool = false
     var showEmptyDates: Bool = false
     var formatOutput: Bool = false
+    var jsonMode: JSONMode? = nil
     var addEventOptions: AddEventOptions = AddEventOptions()
     var editEventOptions: EditEventOptions = EditEventOptions()
 }
@@ -203,6 +209,18 @@ struct CalBuddyCLI: ParsableCommand {
     var formatOutput: Bool = false
 
     @Flag(
+        name: [.customLong("json")],
+        help: "Output compact JSON (supported by eventsToday, eventsNow, eventsFrom:... and calendars)"
+    )
+    var jsonOutput: Bool = false
+
+    @Flag(
+        name: [.customShort("v"), .customLong("verbose")],
+        help: "Verbose output. With --json, include extended fields"
+    )
+    var verboseOutput: Bool = false
+
+    @Flag(
         name: [.customShort("V"), .customLong("version")],
         help: "Print version"
     )
@@ -318,6 +336,9 @@ private extension CalBuddyCLI {
         opts.excludeEndDates = excludeEndDates
         opts.showEmptyDates = showEmptyDates
         opts.formatOutput = formatOutput
+        if jsonOutput {
+            opts.jsonMode = verboseOutput ? .verbose : .compact
+        }
 
         opts.addEventOptions.title = title ?? ""
         opts.addEventOptions.calendarName = calendarName ?? ""
@@ -356,12 +377,45 @@ private extension CalBuddyCLI {
 
 /// Parse command-line arguments into ParsedOptions
 func parseArguments(_ args: [String]) -> ParsedOptions {
+    let (normalizedArgs, forceVerboseJSON) = normalizeJSONArguments(args)
     do {
-        let parsed = try CalBuddyCLI.parse(args)
-        return parsed.toParsedOptions()
+        let parsed = try CalBuddyCLI.parse(normalizedArgs)
+        var options = parsed.toParsedOptions()
+        if forceVerboseJSON, options.jsonMode != nil {
+            options.jsonMode = .verbose
+        }
+        return options
     } catch {
         return ParsedOptions()
     }
+}
+
+/// Accepts --json=all / --json=verbose aliases while keeping --json as a flag.
+private func normalizeJSONArguments(_ args: [String]) -> ([String], Bool) {
+    var normalized: [String] = []
+    var forceVerboseJSON = false
+
+    for arg in args {
+        guard arg.hasPrefix("--json=") else {
+            normalized.append(arg)
+            continue
+        }
+
+        let rawMode = String(arg.dropFirst("--json=".count)).trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        switch rawMode {
+        case "", "1", "true", "compact":
+            normalized.append("--json")
+        case "all", "verbose", "full":
+            normalized.append("--json")
+            forceVerboseJSON = true
+        case "0", "false", "off":
+            continue
+        default:
+            normalized.append(arg)
+        }
+    }
+
+    return (normalized, forceVerboseJSON)
 }
 
 func helpMessage() -> String {

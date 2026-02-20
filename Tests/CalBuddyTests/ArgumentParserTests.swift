@@ -150,6 +150,22 @@ final class ArgumentParserTests: XCTestCase {
         XCTAssertTrue(opts.formatOutput)
     }
 
+    func testJSONOutput() {
+        let opts = parseArguments(["--json", "eventsToday"])
+        XCTAssertEqual(opts.jsonMode, .compact)
+        XCTAssertEqual(opts.command, .eventsToday)
+    }
+
+    func testJSONVerboseOutput() {
+        let opts = parseArguments(["--json", "--verbose", "eventsToday"])
+        XCTAssertEqual(opts.jsonMode, .verbose)
+    }
+
+    func testJSONEqualsAllAlias() {
+        let opts = parseArguments(["--json=all", "eventsToday"])
+        XCTAssertEqual(opts.jsonMode, .verbose)
+    }
+
     func testMultipleFlags() {
         let opts = parseArguments(["-sd", "-nc", "-ea", "-f", "-li", "10", "-df", "%d/%m", "eventsToday+7"])
         XCTAssertTrue(opts.separateByDate)
@@ -175,6 +191,7 @@ final class ArgumentParserTests: XCTestCase {
         XCTAssertFalse(opts.excludeEndDates)
         XCTAssertFalse(opts.showEmptyDates)
         XCTAssertFalse(opts.formatOutput)
+        XCTAssertNil(opts.jsonMode)
         XCTAssertNil(opts.limitItems)
         XCTAssertTrue(opts.includeCals.isEmpty)
         XCTAssertTrue(opts.excludeCals.isEmpty)

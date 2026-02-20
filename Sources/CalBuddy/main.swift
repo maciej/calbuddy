@@ -31,9 +31,18 @@ case .calendars:
         exit(1)
     }
     let calendars = fetcher.getAllCalendars()
-    let output = formatCalendars(calendars, formatOutput: options.formatOutput)
-    if !output.isEmpty {
-        print(output)
+    if let jsonMode = options.jsonMode {
+        do {
+            print(try formatCalendarsJSON(calendars, mode: jsonMode))
+        } catch {
+            fputs("Error: Failed to encode calendars JSON: \(error)\n", stderr)
+            exit(1)
+        }
+    } else {
+        let output = formatCalendars(calendars, formatOutput: options.formatOutput)
+        if !output.isEmpty {
+            print(output)
+        }
     }
     exit(0)
 
@@ -60,9 +69,30 @@ case .eventsToday:
     let startOfDay = cal.startOfDay(for: Date())
     let endOfDay = cal.date(byAdding: .day, value: 1, to: startOfDay)!
     let events = fetcher.fetchEvents(from: startOfDay, to: endOfDay, options: options)
-    let output = formatEvents(events, options: options)
-    if !output.isEmpty {
-        print(output)
+    if let jsonMode = options.jsonMode {
+        do {
+            print(try formatEventsJSON(
+                events: events,
+                options: options,
+                mode: jsonMode,
+                command: "eventsToday",
+                query: EventQueryMetadata(
+                    startDate: startOfDay,
+                    endDate: endOfDay,
+                    startInput: "today",
+                    endInput: "today+1",
+                    referenceNow: nil
+                )
+            ))
+        } catch {
+            fputs("Error: Failed to encode events JSON: \(error)\n", stderr)
+            exit(1)
+        }
+    } else {
+        let output = formatEvents(events, options: options)
+        if !output.isEmpty {
+            print(output)
+        }
     }
     exit(0)
 
@@ -76,9 +106,30 @@ case .eventsTodayPlus(let days):
     let startOfDay = cal.startOfDay(for: Date())
     let endDate = cal.date(byAdding: .day, value: days + 1, to: startOfDay)!
     let events = fetcher.fetchEvents(from: startOfDay, to: endDate, options: options)
-    let output = formatEvents(events, options: options)
-    if !output.isEmpty {
-        print(output)
+    if let jsonMode = options.jsonMode {
+        do {
+            print(try formatEventsJSON(
+                events: events,
+                options: options,
+                mode: jsonMode,
+                command: "eventsToday+\(days)",
+                query: EventQueryMetadata(
+                    startDate: startOfDay,
+                    endDate: endDate,
+                    startInput: "today",
+                    endInput: "today+\(days + 1)",
+                    referenceNow: nil
+                )
+            ))
+        } catch {
+            fputs("Error: Failed to encode events JSON: \(error)\n", stderr)
+            exit(1)
+        }
+    } else {
+        let output = formatEvents(events, options: options)
+        if !output.isEmpty {
+            print(output)
+        }
     }
     exit(0)
 
@@ -101,9 +152,30 @@ case .eventsNow:
     if let limit = options.limitItems, limit > 0 {
         allEvents = Array(allEvents.prefix(limit))
     }
-    let output = formatEvents(allEvents, options: options)
-    if !output.isEmpty {
-        print(output)
+    if let jsonMode = options.jsonMode {
+        do {
+            print(try formatEventsJSON(
+                events: allEvents,
+                options: options,
+                mode: jsonMode,
+                command: "eventsNow",
+                query: EventQueryMetadata(
+                    startDate: startOfDay,
+                    endDate: endOfDay,
+                    startInput: "today",
+                    endInput: "today+1",
+                    referenceNow: now
+                )
+            ))
+        } catch {
+            fputs("Error: Failed to encode events JSON: \(error)\n", stderr)
+            exit(1)
+        }
+    } else {
+        let output = formatEvents(allEvents, options: options)
+        if !output.isEmpty {
+            print(output)
+        }
     }
     exit(0)
 
@@ -163,9 +235,30 @@ case .eventsFromTo(let startStr, let endStr):
         endDate = cal.date(byAdding: .day, value: 1, to: endDate)!
     }
     let events = fetcher.fetchEvents(from: startDate, to: endDate, options: options)
-    let output = formatEvents(events, options: options)
-    if !output.isEmpty {
-        print(output)
+    if let jsonMode = options.jsonMode {
+        do {
+            print(try formatEventsJSON(
+                events: events,
+                options: options,
+                mode: jsonMode,
+                command: "eventsFrom",
+                query: EventQueryMetadata(
+                    startDate: startDate,
+                    endDate: endDate,
+                    startInput: startStr,
+                    endInput: endStr,
+                    referenceNow: nil
+                )
+            ))
+        } catch {
+            fputs("Error: Failed to encode events JSON: \(error)\n", stderr)
+            exit(1)
+        }
+    } else {
+        let output = formatEvents(events, options: options)
+        if !output.isEmpty {
+            print(output)
+        }
     }
     exit(0)
 }

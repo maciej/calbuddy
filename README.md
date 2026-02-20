@@ -32,6 +32,16 @@ calbuddy eventsFrom:2026-02-01 to:2026-02-28
 # List calendars
 calbuddy calendars
 
+# Agent-friendly JSON output
+calbuddy --json eventsToday
+calbuddy --json eventsNow
+calbuddy --json eventsFrom:today to:today+7
+calbuddy --json calendars
+
+# Full JSON payload (verbose)
+calbuddy --json=all eventsToday
+calbuddy --json --verbose eventsToday
+
 # Uncompleted reminders
 calbuddy uncompletedTasks
 
@@ -88,6 +98,8 @@ Installed paths:
 | `-eed`| `--excludeEndDates` | Don't show end times |
 | `-sed`| `--showEmptyDates` | Show empty date sections |
 | `-f`  | `--formatOutput` | ANSI colors |
+|       | `--json` | Compact JSON output for `eventsToday`, `eventsNow`, `eventsFrom:*`, and `calendars` |
+| `-v`  | `--verbose` | Verbose output (with `--json`, includes extended fields) |
 | `-V`  | `--version` | Version |
 
 Properties: `title`, `datetime`, `location`, `notes`, `url`, `attendees`

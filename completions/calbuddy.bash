@@ -161,7 +161,7 @@ _calbuddy() {
     local -a unparsed_words=("${COMP_WORDS[@]:1:${COMP_CWORD}}")
 
     local -a repeating_flags=()
-    local -a non_repeating_flags=(-sc --separateByCalendar -sd --separateByDate -nc --noCalendarNames -ea --excludeAllDayEvents -n --includeOnlyEventsFromNowOn -uid --showUIDs -eed --excludeEndDates -sed --showEmptyDates -f --formatOutput -V --version --allday -h --help)
+    local -a non_repeating_flags=(-sc --separateByCalendar -sd --separateByDate -nc --noCalendarNames -ea --excludeAllDayEvents -n --includeOnlyEventsFromNowOn -uid --showUIDs -eed --excludeEndDates -sed --showEmptyDates -f --formatOutput --json -v --verbose -V --version --allday -h --help)
     local -a repeating_options=(--alarm)
     local -a non_repeating_options=(-df --dateFormat -tf --timeFormat -ic --includeCals -ec --excludeCals -b --bullet -eep --excludeEventProps -iep --includeEventProps -li --limitItems --title --calendar --start --end --duration --location --notes --url --uid)
     __calbuddy_offer_flags_options -1

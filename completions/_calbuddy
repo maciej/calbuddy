@@ -59,6 +59,8 @@ _calbuddy() {
         '(-eed --excludeEndDates)'{-eed,--excludeEndDates}'[Hide end dates]'
         '(-sed --showEmptyDates)'{-sed,--showEmptyDates}'[Show empty date sections]'
         '(-f --formatOutput)'{-f,--formatOutput}'[ANSI color formatting]'
+        '--json[Output compact JSON (supported by eventsToday, eventsNow, eventsFrom\:... and calendars)]'
+        '(-v --verbose)'{-v,--verbose}'[Verbose output. With --json, include extended fields]'
         '(-V --version)'{-V,--version}'[Print version]'
         '--title[Event title]:TITLE:'
         '--calendar[Calendar name]:NAME:'
