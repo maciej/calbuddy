@@ -46,19 +46,6 @@ case .calendars:
     }
     exit(0)
 
-case .uncompletedTasks:
-    let fetcher = EventFetcher()
-    guard fetcher.requestRemindersAccess() else {
-        fputs("Error: Reminders access denied. Grant access in System Settings > Privacy & Security > Reminders.\n", stderr)
-        exit(1)
-    }
-    let reminders = fetcher.fetchUncompletedReminders()
-    let output = formatReminders(reminders, options: options)
-    if !output.isEmpty {
-        print(output)
-    }
-    exit(0)
-
 case .eventsToday:
     let fetcher = EventFetcher()
     guard fetcher.requestCalendarAccess() else {

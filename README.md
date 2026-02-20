@@ -2,6 +2,8 @@
 
 A modern replacement for icalBuddy, built with Swift and EventKit.
 
+`uncompletedTasks` has been removed from CalBuddy. For Apple Reminders CLI workflows, use `remindctl`: https://github.com/steipete/remindctl
+
 ## Build
 
 ```bash
@@ -43,9 +45,6 @@ calbuddy --json calendars
 # Full JSON payload (verbose)
 calbuddy --json=all eventsToday
 calbuddy --json --verbose eventsToday
-
-# Uncompleted reminders
-calbuddy uncompletedTasks
 
 # Generate completion script for your shell
 calbuddy completion zsh

@@ -40,7 +40,7 @@ _calbuddy() {
     local -ir current_word_index="$((CURRENT - 1))"
 
     local -i ret=1
-    local -ar _positionals=('eventsToday' 'eventsToday+1' 'eventsNow' 'eventsFrom:today' 'calendars' 'uncompletedTasks' 'addEvent' 'editEvent' 'completion' 'completions')
+    local -ar _positionals=('eventsToday' 'eventsToday+1' 'eventsNow' 'eventsFrom:today' 'calendars' 'addEvent' 'editEvent' 'completion' 'completions')
     local -ar arg_specs=(
         '(-df --dateFormat)'{-df,--dateFormat}'[Date format]:FORMAT:'
         '(-tf --timeFormat)'{-tf,--timeFormat}'[Time format]:FORMAT:'

@@ -227,7 +227,7 @@ _calbuddy() {
     # Offer positional completions
     case "${positional_number}" in
     *)
-        __calbuddy_add_completions -W 'eventsToday'$'\n''eventsToday+1'$'\n''eventsNow'$'\n''eventsFrom:today'$'\n''calendars'$'\n''uncompletedTasks'$'\n''addEvent'$'\n''editEvent'$'\n''completion'$'\n''completions'
+        __calbuddy_add_completions -W 'eventsToday'$'\n''eventsToday+1'$'\n''eventsNow'$'\n''eventsFrom:today'$'\n''calendars'$'\n''addEvent'$'\n''editEvent'$'\n''completion'$'\n''completions'
         return
         ;;
     esac

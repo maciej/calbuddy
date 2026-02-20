@@ -52,23 +52,3 @@ func formatCalendars(_ calendars: [EKCalendar], formatOutput: Bool) -> String {
     }
     return output.joined(separator: "\n")
 }
-
-/// Format uncompleted reminders
-func formatReminders(_ reminders: [EKReminder], options: ParsedOptions) -> String {
-    var output: [String] = []
-    for reminder in reminders {
-        var line = options.bullet
-        if !options.noCalendarNames {
-            line += "[\(reminder.calendar.title)] "
-        }
-        line += reminder.title ?? "(No Title)"
-        if let dueDate = reminder.dueDateComponents, let date = Calendar.current.date(from: dueDate) {
-            line += " (due: \(formatDate(date, format: options.dateFormat)))"
-        }
-        if let notes = reminder.notes, !notes.isEmpty, shouldShowProperty("notes", options: options) {
-            line += "\n    notes: \(notes.prefix(200))"
-        }
-        output.append(line)
-    }
-    return output.joined(separator: "\n")
-}

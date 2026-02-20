@@ -122,6 +122,6 @@ complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_opti
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" notes' -l 'notes' -d 'Event notes' -rfka ''
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" url' -l 'url' -d 'Event URL' -rfka ''
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" uid' -l 'uid' -d 'Event UID for editEvent' -rfka ''
-complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_positional "calbuddy" 1 -ge' -fka 'eventsToday eventsToday+1 eventsNow eventsFrom:today calendars uncompletedTasks addEvent editEvent completion completions'
+complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_positional "calbuddy" 1 -ge' -fka 'eventsToday eventsToday+1 eventsNow eventsFrom:today calendars addEvent editEvent completion completions'
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" h help' -s 'h' -l 'help' -d 'Show help information.'
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_positional "calbuddy" 2' -fa 'help' -d 'Show subcommand help information.'

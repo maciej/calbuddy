@@ -8,7 +8,6 @@ enum Command: Equatable, Sendable {
     case eventsNow
     case eventsFromTo(String, String)
     case calendars
-    case uncompletedTasks
     case addEvent
     case editEvent
     case completion(String)
@@ -80,7 +79,6 @@ private let legacyCommandCompletions = [
     "eventsNow",
     "eventsFrom:today",
     "calendars",
-    "uncompletedTasks",
     "addEvent",
     "editEvent",
     "completion",
@@ -98,7 +96,6 @@ struct CalBuddyCLI: ParsableCommand {
           eventsNow
           eventsFrom:START to:END
           calendars
-          uncompletedTasks
           addEvent
           editEvent
           completion SHELL
@@ -294,9 +291,6 @@ private func parseCommand(positionals: [String]) -> Command {
     }
     if commandToken == "calendars" {
         return .calendars
-    }
-    if commandToken == "uncompletedTasks" {
-        return .uncompletedTasks
     }
     if commandToken == "addEvent" {
         return .addEvent

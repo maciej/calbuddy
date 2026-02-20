@@ -1,7 +1,7 @@
 import EventKit
 import Foundation
 
-/// Fetches events and reminders from EventKit
+/// Fetches calendar events from EventKit
 final class EventFetcher: @unchecked Sendable {
     let store: EKEventStore
 
@@ -17,21 +17,6 @@ final class EventFetcher: @unchecked Sendable {
             granted = g
             if let error = error {
                 fputs("Calendar access error: \(error.localizedDescription)\n", stderr)
-            }
-            semaphore.signal()
-        }
-        semaphore.wait()
-        return granted
-    }
-
-    /// Request reminders access synchronously
-    func requestRemindersAccess() -> Bool {
-        let semaphore = DispatchSemaphore(value: 0)
-        var granted = false
-        store.requestFullAccessToReminders { g, error in
-            granted = g
-            if let error = error {
-                fputs("Reminders access error: \(error.localizedDescription)\n", stderr)
             }
             semaphore.signal()
         }
@@ -82,20 +67,6 @@ final class EventFetcher: @unchecked Sendable {
         return store.calendars(for: .event).sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
     }
 
-    /// Fetch uncompleted reminders synchronously
-    func fetchUncompletedReminders() -> [EKReminder] {
-        let semaphore = DispatchSemaphore(value: 0)
-        var result: [EKReminder] = []
-        let predicate = store.predicateForIncompleteReminders(withDueDateStarting: nil, ending: nil, calendars: nil)
-        store.fetchReminders(matching: predicate) { reminders in
-            result = reminders ?? []
-            semaphore.signal()
-        }
-        semaphore.wait()
-        return result.sorted {
-            ($0.dueDateComponents?.date ?? .distantFuture) < ($1.dueDateComponents?.date ?? .distantFuture)
-        }
-    }
 }
 
 /// Parse a date string, supporting YYYY-MM-DD, YYYY-MM-DD HH:MM:SS, and relative formats

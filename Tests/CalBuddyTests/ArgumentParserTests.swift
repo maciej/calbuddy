@@ -23,11 +23,6 @@ final class ArgumentParserTests: XCTestCase {
         XCTAssertEqual(opts.command, .calendars)
     }
 
-    func testUncompletedTasksCommand() {
-        let opts = parseArguments(["uncompletedTasks"])
-        XCTAssertEqual(opts.command, .uncompletedTasks)
-    }
-
     func testVersionCommand() {
         let opts = parseArguments(["-V"])
         XCTAssertEqual(opts.command, .version)
