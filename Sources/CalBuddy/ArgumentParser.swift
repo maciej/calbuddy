@@ -10,6 +10,9 @@ enum Command: Equatable, Sendable {
     case calendars
     case addEvent
     case editEvent
+    case deleteEvent
+    case actionLog
+    case revertAction
     case completion(String)
     case version
     case help
@@ -71,6 +74,9 @@ struct ParsedOptions: Sendable {
     var jsonMode: JSONMode? = nil
     var addEventOptions: AddEventOptions = AddEventOptions()
     var editEventOptions: EditEventOptions = EditEventOptions()
+    var actionID: String? = nil
+    var actionLogDB: String? = nil
+    var force: Bool = false
 }
 
 private let legacyCommandCompletions = [
@@ -81,6 +87,9 @@ private let legacyCommandCompletions = [
     "calendars",
     "addEvent",
     "editEvent",
+    "deleteEvent",
+    "actionLog",
+    "revertAction",
     "completion",
     "completions",
 ]
@@ -98,6 +107,9 @@ struct CalBuddyCLI: ParsableCommand {
           calendars
           addEvent
           editEvent
+          deleteEvent
+          actionLog
+          revertAction
           completion SHELL
         """
     )
@@ -207,7 +219,7 @@ struct CalBuddyCLI: ParsableCommand {
 
     @Flag(
         name: [.customLong("json")],
-        help: "Output compact JSON (supported by eventsToday, eventsNow, eventsFrom:... and calendars)"
+        help: "Output compact JSON (supported by eventsToday, eventsNow, eventsFrom:..., calendars, and actionLog)"
     )
     var jsonOutput: Bool = false
 
@@ -256,6 +268,15 @@ struct CalBuddyCLI: ParsableCommand {
     @Option(name: .customLong("uid"), help: ArgumentHelp("Event UID for editEvent", valueName: "UID"))
     var eventUID: String?
 
+    @Option(name: .customLong("actionID"), help: ArgumentHelp("Action log entry ID", valueName: "ID"))
+    var actionID: String?
+
+    @Option(name: .customLong("actionLogDB"), help: ArgumentHelp("Action log SQLite database path", valueName: "PATH"))
+    var actionLogDB: String?
+
+    @Flag(name: .customLong("force"), help: "Force revert through conflicts")
+    var force: Bool = false
+
     @Argument(help: "Legacy command token(s)", completion: .list(legacyCommandCompletions))
     var positionals: [String] = []
 }
@@ -297,6 +318,15 @@ private func parseCommand(positionals: [String]) -> Command {
     }
     if commandToken == "editEvent" {
         return .editEvent
+    }
+    if commandToken == "deleteEvent" {
+        return .deleteEvent
+    }
+    if commandToken == "actionLog" {
+        return .actionLog
+    }
+    if commandToken == "revertAction" {
+        return .revertAction
     }
     if commandToken == "completion" || commandToken == "completions" {
         if let shell = positionals.dropFirst().first?.lowercased(),
@@ -346,6 +376,9 @@ private extension CalBuddyCLI {
         opts.addEventOptions.url = url
 
         opts.editEventOptions.uid = eventUID ?? ""
+        opts.actionID = actionID
+        opts.actionLogDB = actionLogDB
+        opts.force = force
 
         opts.command = parseCommand(positionals: positionals)
         if versionRequested {

@@ -17,7 +17,8 @@ let package = Package(
             ],
             path: "Sources/CalBuddy",
             linkerSettings: [
-                .linkedFramework("EventKit")
+                .linkedFramework("EventKit"),
+                .linkedLibrary("sqlite3")
             ]
         ),
         .testTarget(

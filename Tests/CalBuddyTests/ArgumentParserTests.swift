@@ -274,6 +274,45 @@ final class ArgumentParserTests: XCTestCase {
         XCTAssertNil(opts.addEventOptions.url)
     }
 
+    func testDeleteEventCommand() {
+        let opts = parseArguments(["deleteEvent", "--uid", "event-1"])
+        XCTAssertEqual(opts.command, .deleteEvent)
+        XCTAssertEqual(opts.editEventOptions.uid, "event-1")
+    }
+
+    func testActionLogCommand() {
+        let opts = parseArguments(["actionLog", "--limitItems", "5"])
+        XCTAssertEqual(opts.command, .actionLog)
+        XCTAssertEqual(opts.limitItems, 5)
+    }
+
+    func testActionLogShowCommand() {
+        let opts = parseArguments(["actionLog", "--actionID", "action-1", "--json"])
+        XCTAssertEqual(opts.command, .actionLog)
+        XCTAssertEqual(opts.actionID, "action-1")
+        XCTAssertEqual(opts.jsonMode, .compact)
+    }
+
+    func testRevertActionCommand() {
+        let opts = parseArguments(["revertAction", "--actionID", "action-1"])
+        XCTAssertEqual(opts.command, .revertAction)
+        XCTAssertEqual(opts.actionID, "action-1")
+        XCTAssertFalse(opts.force)
+    }
+
+    func testRevertActionForce() {
+        let opts = parseArguments(["revertAction", "--actionID", "action-1", "--force"])
+        XCTAssertEqual(opts.command, .revertAction)
+        XCTAssertEqual(opts.actionID, "action-1")
+        XCTAssertTrue(opts.force)
+    }
+
+    func testActionLogDatabasePath() {
+        let opts = parseArguments(["--actionLogDB", "/tmp/calbuddy.sqlite3", "actionLog"])
+        XCTAssertEqual(opts.command, .actionLog)
+        XCTAssertEqual(opts.actionLogDB, "/tmp/calbuddy.sqlite3")
+    }
+
     func testHelpMessageContainsLegacyCommandSyntax() {
         let help = helpMessage()
         XCTAssertTrue(help.contains("eventsFrom:START to:END"))
