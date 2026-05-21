@@ -34,6 +34,16 @@ calbuddy eventsFrom:2026-02-01 to:2026-02-28
 # List calendars
 calbuddy calendars
 
+# Start a foreground local server for Calendar access
+calbuddy serve
+
+# Use a custom client/server socket
+calbuddy --socket /tmp/calbuddy.sock serve
+calbuddy --socket /tmp/calbuddy.sock eventsToday
+
+# Bypass the server and access Calendar directly
+calbuddy --direct eventsToday
+
 # Agent-friendly JSON output
 calbuddy --json eventsToday
 calbuddy --json eventsNow
@@ -98,10 +108,72 @@ Installed paths:
 | `-sed`| `--showEmptyDates` | Show empty date sections |
 | `-f`  | `--formatOutput` | ANSI colors |
 |       | `--json` | Compact JSON output for `eventsToday`, `eventsNow`, `eventsFrom:*`, and `calendars` |
+|       | `--direct` | Bypass the local server and access Apple Calendar directly |
+|       | `--socket` | Unix socket path for client/server mode |
 | `-v`  | `--verbose` | Verbose output (with `--json`, includes extended fields) |
 | `-V`  | `--version` | Version |
 
 Properties: `title`, `datetime`, `location`, `notes`, `url`, `attendees`
+
+## Client/Server Mode
+
+`calbuddy serve` starts a foreground local server that owns Apple Calendar access through EventKit. Normal calendar commands first try to connect to that server and, if the server socket is unavailable, fall back to direct Calendar access so existing CLI workflows keep working.
+
+```bash
+# Terminal 1: grant Calendar access to this long-lived process
+calbuddy serve
+
+# Terminal 2: uses the server when it is reachable
+calbuddy eventsToday
+calbuddy addEvent --title "Dentist" --calendar "Family" --start "2026-02-10 14:00"
+```
+
+The default Unix socket is `/tmp/calbuddy-$UID.sock`. Override it with `--socket PATH` or `CALBUDDY_SOCKET`:
+
+```bash
+CALBUDDY_SOCKET=/tmp/calbuddy-agent.sock calbuddy serve
+CALBUDDY_SOCKET=/tmp/calbuddy-agent.sock calbuddy eventsToday
+```
+
+Use `--direct` or `CALBUDDY_DIRECT=1` to bypass the server:
+
+```bash
+calbuddy --direct eventsToday
+CALBUDDY_DIRECT=1 calbuddy calendars
+```
+
+Connection-level failures such as a missing, refused, timed-out, or stale socket fall back to direct mode. A reachable server's command errors, Calendar/API failures, malformed responses, and protocol-version mismatches are reported as server errors.
+
+### Server Protocol
+
+The transport is local Unix-domain socket only. Each message is a 4-byte big-endian payload length followed by UTF-8 JSON. Field names are snake_case.
+
+Request:
+
+```json
+{
+  "protocol_version": 1,
+  "client_version": "1.0.0",
+  "request_id": "UUID",
+  "argv": ["eventsToday"]
+}
+```
+
+Response:
+
+```json
+{
+  "protocol_version": 1,
+  "server_version": "1.0.0",
+  "request_id": "UUID",
+  "exit_code": 0,
+  "stdout": "...",
+  "stderr": "",
+  "error": null
+}
+```
+
+`argv` uses the same command tokens and options as the CLI, and the server returns the rendered stdout/stderr so existing output behavior remains centralized in CalBuddy.
 
 ## Compatibility Notes
 

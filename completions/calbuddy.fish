@@ -27,7 +27,7 @@ function __calbuddy_parse_tokens -S
 
     switch $unparsed_tokens[1]
     case 'calbuddy'
-        __calbuddy_parse_subcommand -r 1 'dateFormat=' 'timeFormat=' 'includeCals=' 'excludeCals=' 'separateByCalendar' 'separateByDate' 'b/bullet=' 'noCalendarNames' 'excludeAllDayEvents' 'n/includeOnlyEventsFromNowOn' 'excludeEventProps=' 'includeEventProps=' 'limitItems=' 'showUIDs' 'excludeEndDates' 'showEmptyDates' 'f/formatOutput' 'json' 'v/verbose' 'V/version' 'title=' 'calendar=' 'start=' 'end=' 'duration=' 'allday' 'alarm=+' 'location=' 'notes=' 'url=' 'uid=' 'h/help'
+        __calbuddy_parse_subcommand -r 1 'dateFormat=' 'timeFormat=' 'includeCals=' 'excludeCals=' 'separateByCalendar' 'separateByDate' 'b/bullet=' 'noCalendarNames' 'excludeAllDayEvents' 'n/includeOnlyEventsFromNowOn' 'excludeEventProps=' 'includeEventProps=' 'limitItems=' 'showUIDs' 'excludeEndDates' 'showEmptyDates' 'f/formatOutput' 'json' 'v/verbose' 'V/version' 'direct' 'socket=' 'title=' 'calendar=' 'start=' 'end=' 'duration=' 'allday' 'alarm=+' 'location=' 'notes=' 'url=' 'uid=' 'h/help'
         switch $unparsed_tokens[1]
         case 'help'
             __calbuddy_parse_subcommand -r 1 
@@ -111,6 +111,8 @@ complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_opti
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" json' -l 'json' -d 'Output compact JSON (supported by eventsToday, eventsNow, eventsFrom:... and calendars)'
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" v verbose' -s 'v' -l 'verbose' -d 'Verbose output. With --json, include extended fields'
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" V version' -s 'V' -l 'version' -d 'Print version'
+complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" direct' -l 'direct' -d 'Bypass a running calbuddy server and access Calendar directly'
+complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" socket' -l 'socket' -d 'Unix socket path for client/server mode' -rfka ''
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" title' -l 'title' -d 'Event title' -rfka ''
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" calendar' -l 'calendar' -d 'Calendar name' -rfka ''
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" start' -l 'start' -d 'Start date/time' -rfka ''
@@ -122,6 +124,6 @@ complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_opti
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" notes' -l 'notes' -d 'Event notes' -rfka ''
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" url' -l 'url' -d 'Event URL' -rfka ''
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" uid' -l 'uid' -d 'Event UID for editEvent' -rfka ''
-complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_positional "calbuddy" 1 -ge' -fka 'eventsToday eventsToday+1 eventsNow eventsFrom:today calendars addEvent editEvent completion completions'
+complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_positional "calbuddy" 1 -ge' -fka 'eventsToday eventsToday+1 eventsNow eventsFrom:today calendars addEvent editEvent serve completion completions'
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_flags_or_options "calbuddy" h help' -s 'h' -l 'help' -d 'Show help information.'
 complete -c 'calbuddy' -n '__calbuddy_should_offer_completions_for_positional "calbuddy" 2' -fa 'help' -d 'Show subcommand help information.'

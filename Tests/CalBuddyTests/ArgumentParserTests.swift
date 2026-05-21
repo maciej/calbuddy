@@ -43,6 +43,41 @@ final class ArgumentParserTests: XCTestCase {
         XCTAssertEqual(opts.command, .completion(""))
     }
 
+    func testServeCommand() {
+        let opts = parseArguments(["serve"])
+        XCTAssertEqual(opts.command, .serve)
+    }
+
+    func testDirectFlag() {
+        let opts = parseArguments(["--direct", "eventsToday"])
+        XCTAssertTrue(opts.direct)
+        XCTAssertEqual(opts.command, .eventsToday)
+    }
+
+    func testSocketFlag() {
+        let opts = parseArguments(["--socket", "/tmp/custom-calbuddy.sock", "eventsToday"])
+        XCTAssertEqual(opts.socketPath, "/tmp/custom-calbuddy.sock")
+        XCTAssertEqual(opts.command, .eventsToday)
+    }
+
+    func testSocketEnvironmentDefault() {
+        let opts = parseArguments(["eventsToday"], environment: ["CALBUDDY_SOCKET": "/tmp/env-calbuddy.sock"])
+        XCTAssertEqual(opts.socketPath, "/tmp/env-calbuddy.sock")
+    }
+
+    func testSocketFlagOverridesEnvironmentDefault() {
+        let opts = parseArguments(
+            ["--socket", "/tmp/flag-calbuddy.sock", "eventsToday"],
+            environment: ["CALBUDDY_SOCKET": "/tmp/env-calbuddy.sock"]
+        )
+        XCTAssertEqual(opts.socketPath, "/tmp/flag-calbuddy.sock")
+    }
+
+    func testDirectEnvironmentDefault() {
+        let opts = parseArguments(["eventsToday"], environment: ["CALBUDDY_DIRECT": "1"])
+        XCTAssertTrue(opts.direct)
+    }
+
     func testEventsFromToCommand() {
         let opts = parseArguments(["eventsFrom:2026-02-01", "to:2026-02-10"])
         XCTAssertEqual(opts.command, .eventsFromTo("2026-02-01", "2026-02-10"))
