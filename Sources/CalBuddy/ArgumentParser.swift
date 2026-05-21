@@ -1,5 +1,6 @@
 import ArgumentParser
 import Foundation
+import Darwin
 
 /// Represents the command the user wants to execute
 enum Command: Equatable, Sendable {
@@ -10,6 +11,7 @@ enum Command: Equatable, Sendable {
     case calendars
     case addEvent
     case editEvent
+    case serve
     case completion(String)
     case version
     case help
@@ -69,8 +71,14 @@ struct ParsedOptions: Sendable {
     var showEmptyDates: Bool = false
     var formatOutput: Bool = false
     var jsonMode: JSONMode? = nil
+    var direct: Bool = false
+    var socketPath: String = defaultCalBuddySocketPath()
     var addEventOptions: AddEventOptions = AddEventOptions()
     var editEventOptions: EditEventOptions = EditEventOptions()
+}
+
+func defaultCalBuddySocketPath() -> String {
+    "/tmp/calbuddy-\(getuid()).sock"
 }
 
 private let legacyCommandCompletions = [
@@ -81,6 +89,7 @@ private let legacyCommandCompletions = [
     "calendars",
     "addEvent",
     "editEvent",
+    "serve",
     "completion",
     "completions",
 ]
@@ -98,6 +107,7 @@ struct CalBuddyCLI: ParsableCommand {
           calendars
           addEvent
           editEvent
+          serve
           completion SHELL
         """
     )
@@ -223,6 +233,18 @@ struct CalBuddyCLI: ParsableCommand {
     )
     var versionRequested: Bool = false
 
+    @Flag(
+        name: .customLong("direct"),
+        help: "Bypass a running calbuddy server and access Calendar directly"
+    )
+    var direct: Bool = false
+
+    @Option(
+        name: .customLong("socket"),
+        help: ArgumentHelp("Unix socket path for client/server mode", valueName: "PATH")
+    )
+    var socketPath: String?
+
     @Option(name: .customLong("title"), help: ArgumentHelp("Event title", valueName: "TITLE"))
     var title: String?
 
@@ -298,6 +320,9 @@ private func parseCommand(positionals: [String]) -> Command {
     if commandToken == "editEvent" {
         return .editEvent
     }
+    if commandToken == "serve" {
+        return .serve
+    }
     if commandToken == "completion" || commandToken == "completions" {
         if let shell = positionals.dropFirst().first?.lowercased(),
            shell == "bash" || shell == "zsh" || shell == "fish"
@@ -330,6 +355,10 @@ private extension CalBuddyCLI {
         opts.excludeEndDates = excludeEndDates
         opts.showEmptyDates = showEmptyDates
         opts.formatOutput = formatOutput
+        opts.direct = direct
+        if let socketPath, !socketPath.isEmpty {
+            opts.socketPath = socketPath
+        }
         if jsonOutput {
             opts.jsonMode = verboseOutput ? .verbose : .compact
         }
@@ -371,16 +400,38 @@ private extension CalBuddyCLI {
 
 /// Parse command-line arguments into ParsedOptions
 func parseArguments(_ args: [String]) -> ParsedOptions {
+    parseArguments(args, environment: ProcessInfo.processInfo.environment)
+}
+
+func parseArguments(_ args: [String], environment: [String: String]) -> ParsedOptions {
     let (normalizedArgs, forceVerboseJSON) = normalizeJSONArguments(args)
     do {
         let parsed = try CalBuddyCLI.parse(normalizedArgs)
         var options = parsed.toParsedOptions()
+        applyEnvironmentDefaults(to: &options, environment: environment)
         if forceVerboseJSON, options.jsonMode != nil {
             options.jsonMode = .verbose
         }
         return options
     } catch {
-        return ParsedOptions()
+        var options = ParsedOptions()
+        applyEnvironmentDefaults(to: &options, environment: environment)
+        return options
+    }
+}
+
+private func applyEnvironmentDefaults(to options: inout ParsedOptions, environment: [String: String]) {
+    if options.socketPath == defaultCalBuddySocketPath(),
+       let socketPath = environment["CALBUDDY_SOCKET"],
+       !socketPath.isEmpty
+    {
+        options.socketPath = socketPath
+    }
+
+    if let direct = environment["CALBUDDY_DIRECT"],
+       ["1", "true", "yes", "on"].contains(direct.lowercased())
+    {
+        options.direct = true
     }
 }
 

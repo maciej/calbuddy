@@ -40,7 +40,7 @@ _calbuddy() {
     local -ir current_word_index="$((CURRENT - 1))"
 
     local -i ret=1
-    local -ar _positionals=('eventsToday' 'eventsToday+1' 'eventsNow' 'eventsFrom:today' 'calendars' 'addEvent' 'editEvent' 'completion' 'completions')
+    local -ar _positionals=('eventsToday' 'eventsToday+1' 'eventsNow' 'eventsFrom:today' 'calendars' 'addEvent' 'editEvent' 'serve' 'completion' 'completions')
     local -ar arg_specs=(
         '(-df --dateFormat)'{-df,--dateFormat}'[Date format]:FORMAT:'
         '(-tf --timeFormat)'{-tf,--timeFormat}'[Time format]:FORMAT:'
@@ -62,6 +62,8 @@ _calbuddy() {
         '--json[Output compact JSON (supported by eventsToday, eventsNow, eventsFrom\:... and calendars)]'
         '(-v --verbose)'{-v,--verbose}'[Verbose output. With --json, include extended fields]'
         '(-V --version)'{-V,--version}'[Print version]'
+        '--direct[Bypass a running calbuddy server and access Calendar directly]'
+        '--socket[Unix socket path for client/server mode]:PATH:'
         '--title[Event title]:TITLE:'
         '--calendar[Calendar name]:NAME:'
         '--start[Start date/time]:DATETIME:'

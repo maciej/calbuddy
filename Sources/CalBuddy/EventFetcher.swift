@@ -5,23 +5,26 @@ import Foundation
 final class EventFetcher: @unchecked Sendable {
     let store: EKEventStore
 
-    init() {
-        self.store = EKEventStore()
+    init(store: EKEventStore = EKEventStore()) {
+        self.store = store
     }
 
     /// Request calendar access synchronously
     func requestCalendarAccess() -> Bool {
         let semaphore = DispatchSemaphore(value: 0)
-        var granted = false
+        final class AccessBox: @unchecked Sendable {
+            var granted = false
+        }
+        let box = AccessBox()
         store.requestFullAccessToEvents { g, error in
-            granted = g
+            box.granted = g
             if let error = error {
                 fputs("Calendar access error: \(error.localizedDescription)\n", stderr)
             }
             semaphore.signal()
         }
         semaphore.wait()
-        return granted
+        return box.granted
     }
 
     /// Fetch events in a date range
