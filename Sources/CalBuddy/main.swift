@@ -7,6 +7,17 @@ let version = "1.0.0"
 let args = Array(CommandLine.arguments.dropFirst())
 let options = parseArguments(args)
 
+func actionLogStore(from options: ParsedOptions) -> ActionLogStore {
+    ActionLogStore(path: ActionLogStore.resolveDatabasePath(override: options.actionLogDB))
+}
+
+func makeActionService(fetcher: EventFetcher, options: ParsedOptions) -> CalendarActionService {
+    CalendarActionService(
+        calendar: EventKitCalendarMutationClient(store: fetcher.store),
+        actionLog: actionLogStore(from: options)
+    )
+}
+
 switch options.command {
 case .version:
     print("calbuddy \(version)")
@@ -167,15 +178,21 @@ case .eventsNow:
     exit(0)
 
 case .addEvent:
+    do {
+        try actionLogStore(from: options).ensureReady()
+    } catch {
+        fputs("Error: \(error)\n", stderr)
+        exit(1)
+    }
     let fetcher = EventFetcher()
     guard fetcher.requestCalendarAccess() else {
         fputs("Error: Calendar access denied. Grant access in System Settings > Privacy & Security > Calendars.\n", stderr)
         exit(1)
     }
-    let creator = EventCreator(store: fetcher.store)
     do {
-        let eventId = try creator.createEvent(options: options.addEventOptions)
-        print("OK: \(eventId)")
+        let snapshot = try makeActionService(fetcher: fetcher, options: options)
+            .addEvent(options: options.addEventOptions)
+        print("OK: \(snapshot.preferredIdentifier ?? "unknown")")
         exit(0)
     } catch {
         fputs("Error: \(error)\n", stderr)
@@ -183,6 +200,12 @@ case .addEvent:
     }
 
 case .editEvent:
+    do {
+        try actionLogStore(from: options).ensureReady()
+    } catch {
+        fputs("Error: \(error)\n", stderr)
+        exit(1)
+    }
     let fetcher = EventFetcher()
     guard fetcher.requestCalendarAccess() else {
         fputs("Error: Calendar access denied. Grant access in System Settings > Privacy & Security > Calendars.\n", stderr)
@@ -192,10 +215,84 @@ case .editEvent:
         fputs("Error: --uid is required for editEvent\n", stderr)
         exit(1)
     }
-    let editor = EventEditor(store: fetcher.store)
     do {
-        let eventId = try editor.editEvent(options: options.editEventOptions)
-        print("OK: \(eventId)")
+        let snapshot = try makeActionService(fetcher: fetcher, options: options)
+            .editEvent(options: options.editEventOptions)
+        print("OK: \(snapshot.preferredIdentifier ?? "unknown")")
+        exit(0)
+    } catch {
+        fputs("Error: \(error)\n", stderr)
+        exit(1)
+    }
+
+case .deleteEvent:
+    do {
+        try actionLogStore(from: options).ensureReady()
+    } catch {
+        fputs("Error: \(error)\n", stderr)
+        exit(1)
+    }
+    let fetcher = EventFetcher()
+    guard fetcher.requestCalendarAccess() else {
+        fputs("Error: Calendar access denied. Grant access in System Settings > Privacy & Security > Calendars.\n", stderr)
+        exit(1)
+    }
+    guard !options.editEventOptions.uid.isEmpty else {
+        fputs("Error: --uid is required for deleteEvent\n", stderr)
+        exit(1)
+    }
+    do {
+        try makeActionService(fetcher: fetcher, options: options)
+            .deleteEvent(uid: options.editEventOptions.uid)
+        print("OK")
+        exit(0)
+    } catch {
+        fputs("Error: \(error)\n", stderr)
+        exit(1)
+    }
+
+case .actionLog:
+    do {
+        let store = actionLogStore(from: options)
+        if let actionID = options.actionID, !actionID.isEmpty {
+            guard let entry = try store.get(actionID: actionID) else {
+                fputs("Error: No action log entry found with ID: \(actionID)\n", stderr)
+                exit(1)
+            }
+            print(try formatActionLogEntry(entry, jsonMode: options.jsonMode))
+        } else {
+            let entries = try store.list(limit: options.limitItems ?? 20)
+            let output = try formatActionLogList(entries, jsonMode: options.jsonMode)
+            if !output.isEmpty {
+                print(output)
+            }
+        }
+        exit(0)
+    } catch {
+        fputs("Error: \(error)\n", stderr)
+        exit(1)
+    }
+
+case .revertAction:
+    do {
+        try actionLogStore(from: options).ensureReady()
+    } catch {
+        fputs("Error: \(error)\n", stderr)
+        exit(1)
+    }
+    let fetcher = EventFetcher()
+    guard fetcher.requestCalendarAccess() else {
+        fputs("Error: Calendar access denied. Grant access in System Settings > Privacy & Security > Calendars.\n", stderr)
+        exit(1)
+    }
+    guard let actionID = options.actionID, !actionID.isEmpty else {
+        fputs("Error: --actionID is required for revertAction\n", stderr)
+        exit(1)
+    }
+    do {
+        let snapshot = try makeActionService(fetcher: fetcher, options: options)
+            .revertAction(actionID: actionID, force: options.force)
+        print("OK: \(snapshot?.preferredIdentifier ?? "removed")")
         exit(0)
     } catch {
         fputs("Error: \(error)\n", stderr)
