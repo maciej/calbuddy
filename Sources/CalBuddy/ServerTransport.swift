@@ -162,6 +162,9 @@ final class CalBuddyServer {
             )
 
         case .success(let request):
+            fputs(formatServerRequestLogLine(request) + "\n", stdout)
+            fflush(stdout)
+
             guard request.protocolVersion == calBuddyProtocolVersion else {
                 let message = "protocol mismatch: expected \(calBuddyProtocolVersion), got \(request.protocolVersion)"
                 return CalBuddyServerResponse(

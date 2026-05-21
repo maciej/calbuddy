@@ -72,4 +72,21 @@ final class ServerProtocolTests: XCTestCase {
             )
         }
     }
+
+    func testServerRequestLogLineIncludesRequestMetadataAndQuotedArguments() {
+        let request = CalBuddyServerRequest(
+            protocolVersion: calBuddyProtocolVersion,
+            clientVersion: "1.0.0",
+            requestID: "abc",
+            argv: ["eventsFrom:2026-05-21", "to:2026-05-22", "--includeCals", "Work Calendar", "Bob's"]
+        )
+        let receivedAt = Date(timeIntervalSince1970: 1_777_859_790)
+
+        let line = formatServerRequestLogLine(request, receivedAt: receivedAt)
+
+        XCTAssertTrue(line.hasPrefix("[2026-05-04T01:56:30Z] calbuddy server request"))
+        XCTAssertTrue(line.contains("id=abc"))
+        XCTAssertTrue(line.contains("client=1.0.0"))
+        XCTAssertTrue(line.contains("argv=eventsFrom:2026-05-21 to:2026-05-22 --includeCals 'Work Calendar' 'Bob'\\''s'"))
+    }
 }

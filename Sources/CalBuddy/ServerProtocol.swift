@@ -170,3 +170,21 @@ func validateServerResponse(_ response: CalBuddyServerResponse, requestID: Strin
         )
     }
 }
+
+func formatServerRequestLogLine(_ request: CalBuddyServerRequest, receivedAt: Date = Date()) -> String {
+    let timestamp = ISO8601DateFormatter().string(from: receivedAt)
+    let argv = request.argv.map(shellQuotedLogArgument).joined(separator: " ")
+    return "[\(timestamp)] calbuddy server request id=\(request.requestID) client=\(request.clientVersion) argv=\(argv)"
+}
+
+private func shellQuotedLogArgument(_ argument: String) -> String {
+    guard !argument.isEmpty else {
+        return "''"
+    }
+
+    let safeCharacters = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "_-./:=+@,%"))
+    guard argument.unicodeScalars.allSatisfy({ safeCharacters.contains($0) }) else {
+        return "'" + argument.replacingOccurrences(of: "'", with: "'\\''") + "'"
+    }
+    return argument
+}
